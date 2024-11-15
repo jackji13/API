@@ -37,7 +37,9 @@ app.get('/scrape', async (req, res) => {
   }
 
   try {
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
     const page = await browser.newPage();
     await page.goto(url, { waitUntil: 'networkidle2' });
 
@@ -60,6 +62,7 @@ app.get('/scrape', async (req, res) => {
     await browser.close();
     res.json(inputElements);
   } catch (error) {
+    console.error('Error during scraping:', error.message); // Log the error message
     res.status(500).send('Error scraping the website');
   }
 });
