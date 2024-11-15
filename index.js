@@ -1,34 +1,29 @@
-const express = require('express');
-const cors = require('cors');
-const puppeteer = require('puppeteer');
+import express from 'express';
+import cors from 'cors';
+import puppeteer from 'puppeteer';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // List of allowed origins
 const allowedOrigins = [
-  'https://jackji13.github.io/2024LAB',  // Main URL
-  'http://127.0.0.1:5500',                // Local testing URL
-  'http://localhost:3000'                 // Local development URL
+  'https://jackji13.github.io/2024LAB',
+  'http://127.0.0.1:5500',
+  'http://localhost:3000'
 ];
 
 // Configure CORS middleware
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin) {
-      // Allow requests with no origin (like mobile apps or curl requests)
-      callback(null, true);
-    } else if (
-      allowedOrigins.includes(origin) || 
-      origin.startsWith('https://jackji13.github.io/2024LAB')
-    ) {
-      // Allow specific origins and any subpath of 'https://jackji13.github.io/2024LAB'
+    if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
     }
   }
 }));
+
+app.use(express.json());
 
 // Default route to inform users about the API
 app.get('/', (req, res) => {
@@ -74,4 +69,6 @@ app.get('/scrape', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Input Box Scraper API running on port ${PORT}`);
+});
