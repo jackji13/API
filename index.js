@@ -7,24 +7,22 @@ const PORT = process.env.PORT || 3000;
 
 // List of allowed origins
 const allowedOrigins = [
-  'http://127.0.0.1:5500',
-  'http://localhost:3000'
+  'https://jackji13.github.io/2024LAB',  // Main URL
+  'http://127.0.0.1:5500',                // Local testing URL
+  'http://localhost:3000'                 // Local development URL
 ];
-
-// Function to check if the origin is allowed
-function isOriginAllowed(origin) {
-  // Allow all children paths of 'https://jackji13.github.io/2024LAB'
-  if (origin && origin.startsWith('https://jackji13.github.io/2024LAB')) {
-    return true;
-  }
-  // Check against the other allowed origins
-  return allowedOrigins.includes(origin);
-}
 
 // Configure CORS middleware
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || isOriginAllowed(origin)) {
+    if (!origin) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      callback(null, true);
+    } else if (
+      allowedOrigins.includes(origin) || 
+      origin.startsWith('https://jackji13.github.io/2024LAB')
+    ) {
+      // Allow specific origins and any subpath of 'https://jackji13.github.io/2024LAB'
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
