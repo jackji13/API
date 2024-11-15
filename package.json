@@ -1,9 +1,21 @@
 {
+  "name": "input-box-scraper-api",
+  "version": "1.0.0",
+  "description": "API to scrape input box elements and styles from a given URL",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "develop": "nodemon index.js",
+    "start": "node index.js"
+  },
+  "author": "",
+  "license": "ISC",
   "dependencies": {
-    "axios": "^1.7.7",
-    "cheerio": "^1.0.0",
     "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
     "express": "^4.21.1",
-    "puppeteer": "^23.8.0"
+    "puppeteer": "^23.8.0",
+    "nodemon": "^3.1.7"
   }
 }
