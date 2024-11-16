@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 3000;
 
 // List of allowed origins
 const allowedOrigins = [
-  'https://jackji13.github.io/2024LAB',
+  'https://jackji13.github.io',
   'http://127.0.0.1:5500',
   'http://localhost:3000'
 ];
@@ -15,12 +15,7 @@ const allowedOrigins = [
 // Configure CORS middleware
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin) {
-      callback(null, true);
-    } else if (
-      allowedOrigins.includes(origin) ||
-      origin.startsWith('https://jackji13.github.io/2024LAB')
-    ) {
+    if (!origin || allowedOrigins.some(allowedOrigin => origin.startsWith(allowedOrigin))) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
