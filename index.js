@@ -42,7 +42,7 @@ app.get('/scrape', async (req, res) => {
   try {
     const browser = await puppeteer.launch({
       headless: 'new',
-      executablePath: '/opt/render/.cache/puppeteer/chrome/linux-131.0.6778.69/chrome-linux64/chrome', // Specify path to Chromium
+      executablePath: puppeteer.executablePath(), // Use Puppeteer's method to get the executable path
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
