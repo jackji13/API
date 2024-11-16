@@ -38,6 +38,7 @@ app.get('/scrape', async (req, res) => {
 
   try {
     const browser = await puppeteer.launch({
+      executablePath: puppeteer.executablePath(), // Use Puppeteer's installed Chromium
       args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
     const page = await browser.newPage();
@@ -62,7 +63,7 @@ app.get('/scrape', async (req, res) => {
     await browser.close();
     res.json(inputElements);
   } catch (error) {
-    console.error('Error during scraping:', error.message); // Log the error message
+    console.error('Error during scraping:', error.message);
     res.status(500).send('Error scraping the website');
   }
 });
