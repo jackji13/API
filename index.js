@@ -38,7 +38,6 @@ app.get('/scrape', async (req, res) => {
 
   try {
     const browser = await puppeteer.launch({
-      executablePath: puppeteer.executablePath(), // Use Puppeteer's installed Chromium
       args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
     const page = await browser.newPage();
