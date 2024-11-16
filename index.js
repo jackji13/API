@@ -7,20 +7,28 @@ const PORT = process.env.PORT || 3000;
 
 // List of allowed origins
 const allowedOrigins = [
-  'https://jackji13.github.io',
+  'https://jackji13.github.io/2024LAB',
   'http://127.0.0.1:5500',
   'http://localhost:3000'
 ];
 
 // Configure CORS middleware
 app.use(cors({
-  origin: allowedOrigins,
-  credentials: true
+  origin: (origin, callback) => {
+    if (!origin) {
+      callback(null, true);
+    } else if (
+      allowedOrigins.includes(origin) ||
+      origin.startsWith('https://jackji13.github.io/2024LAB')
+    ) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  }
 }));
 
-app.use(express.json());
-
-// Default route to inform users about the API
+// Default route
 app.get('/', (req, res) => {
   res.json({
     message: "Welcome to the Input Box Scraper API!",
@@ -38,7 +46,12 @@ app.get('/scrape', async (req, res) => {
 
   try {
     const browser = await puppeteer.launch({
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+      headless: 'new',
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage'
+      ]
     });
     const page = await browser.newPage();
     await page.goto(url, { waitUntil: 'networkidle2' });
@@ -62,11 +75,8 @@ app.get('/scrape', async (req, res) => {
     await browser.close();
     res.json(inputElements);
   } catch (error) {
-    console.error('Error during scraping:', error.message);
     res.status(500).send('Error scraping the website');
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Input Box Scraper API running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
