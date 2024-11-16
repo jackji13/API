@@ -1,6 +1,9 @@
 import express from 'express';
 import cors from 'cors';
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-extra';
+import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+
+puppeteer.use(StealthPlugin()); // Use the stealth plugin to mimic real user behavior
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -42,13 +45,15 @@ app.get('/scrape', async (req, res) => {
   try {
     const browser = await puppeteer.launch({
       headless: 'new',
-      executablePath: puppeteer.executablePath(), // Use Puppeteer's method to get the executable path
+      executablePath: '/opt/render/.cache/puppeteer/chrome/linux-131.0.6778.69/chrome-linux64/chrome',
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage'
-      ]
+      ],
+      userDataDir: '/opt/render/.cache/puppeteer' // Set the cache path explicitly
     });
+
     const page = await browser.newPage();
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36');
     await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 }); // 60 seconds
