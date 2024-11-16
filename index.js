@@ -43,15 +43,14 @@ app.get('/scrape', async (req, res) => {
   }
 
   try {
+    // Launch Puppeteer without specifying executablePath
     const browser = await puppeteer.launch({
       headless: 'new',
-      executablePath: '/opt/render/.cache/puppeteer/chrome/linux-131.0.6778.69/chrome-linux64/chrome',
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage'
-      ],
-      userDataDir: '/opt/render/.cache/puppeteer' // Set the cache path explicitly
+      ]
     });
 
     const page = await browser.newPage();
