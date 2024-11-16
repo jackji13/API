@@ -49,7 +49,8 @@ app.get('/scrape', async (req, res) => {
       ]
     });
     const page = await browser.newPage();
-    await page.goto(url, { waitUntil: 'networkidle2' });
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36');
+    await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 }); // 60 seconds
 
     // Extract input boxes and their full computed styles
     const inputElements = await page.evaluate(() => {
@@ -70,6 +71,7 @@ app.get('/scrape', async (req, res) => {
     await browser.close();
     res.json(inputElements);
   } catch (error) {
+    console.error('Error during scraping:', error); // Log the error for debugging
     res.status(500).send('Error scraping the website');
   }
 });
