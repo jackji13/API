@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-core'; // Use puppeteer-core
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -41,6 +41,7 @@ app.get('/scrape', async (req, res) => {
 
   try {
     const browser = await puppeteer.launch({
+      executablePath: '/usr/bin/google-chrome-stable', // Specify path to Chrome
       headless: 'new',
       args: [
         '--no-sandbox',
