@@ -49,8 +49,13 @@ app.get('/scrape', async (req, res) => {
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage'
+        '--single-process',
+        '--no-zygote'
       ]
+      executablePath:
+        process.env.NODE_ENV === "production" 
+        ? process.nextTick.PUPPETEER_EXECUTABLE_PATH 
+        : puppeteer.executablePath(),
     });
 
     const page = await browser.newPage();
