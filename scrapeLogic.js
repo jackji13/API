@@ -1,7 +1,7 @@
 const puppeteer = require("puppeteer");
 require("dotenv").config();
 
-const scrapeLogic = async (url, res) => {
+const scrapeLogic = async (url, elementType, res) => {
   const browser = await puppeteer.launch({
     args: [
       "--disable-setuid-sandbox",
@@ -17,43 +17,80 @@ const scrapeLogic = async (url, res) => {
 
   try {
     const page = await browser.newPage();
-    await page.goto(url, { waitUntil: "load", timeout: 0 });
+    await page.goto(url, { waitUntil: "networkidle2", timeout: 60000 });
 
-    // Scrape multiple types of elements in the context of the browser
-    const elements = await page.evaluate(() => {
-      // Helper function to scrape elements
-      const scrapeElements = (selector) => {
-        return Array.from(document.querySelectorAll(selector)).map((element) => {
-          const computedStyles = window.getComputedStyle(element);
-          let styles = {};
-          for (let property of computedStyles) {
-            styles[property] = computedStyles.getPropertyValue(property);
+    // Only scrape the selected element type
+    const elementHandles = await page.$$(elementType);
+
+    // Limit the number of elements to prevent excessive processing
+    const maxElements = 10; // Adjust this number as needed
+    const limitedElementHandles = elementHandles.slice(0, maxElements);
+
+    // Process elements in parallel to improve performance
+    const elementsData = await Promise.all(
+      limitedElementHandles.map(async (element) => {
+        try {
+          // Scroll the element into view
+          await element.evaluate((node) => {
+            node.scrollIntoView({ block: "center", inline: "center" });
+          });
+
+          // Check if the element is visible
+          const isVisible = await element.evaluate((el) => {
+            const style = window.getComputedStyle(el);
+            return (
+              style &&
+              style.display !== "none" &&
+              style.visibility !== "hidden" &&
+              parseFloat(style.opacity) > 0 &&
+              el.offsetHeight > 0 &&
+              el.offsetWidth > 0
+            );
+          });
+
+          if (!isVisible) {
+            // Skip elements that are not visible
+            return null;
           }
 
-          return {
-            tagName: element.tagName.toLowerCase(),
-            textContent: element.textContent || "",
-            innerHTML: element.innerHTML || "",
-            id: element.id || "no-id",
-            className: element.className || "no-class",
-            attributes: Array.from(element.attributes).reduce((attrs, attr) => {
-              attrs[attr.name] = attr.value;
-              return attrs;
-            }, {}),
-            styles
-          };
-        });
-      };
+          // Extract data from the element
+          const elementData = await element.evaluate((node) => {
+            const computedStyles = window.getComputedStyle(node);
+            let styles = {};
+            for (let property of computedStyles) {
+              styles[property] = computedStyles.getPropertyValue(property);
+            }
+            return {
+              tagName: node.tagName.toLowerCase(),
+              textContent: node.textContent || "",
+              innerHTML: node.innerHTML || "",
+              id: node.id || "no-id",
+              className: node.className || "no-class",
+              attributes: Array.from(node.attributes).reduce((attrs, attr) => {
+                attrs[attr.name] = attr.value;
+                return attrs;
+              }, {}),
+              styles,
+            };
+          });
 
-      return {
-        h1: scrapeElements("h1"),
-        hr: scrapeElements("hr"),
-        button: scrapeElements("button"),
-        input: scrapeElements("input")
-      };
-    });
+          // Take screenshot of the element
+          const screenshotBuffer = await element.screenshot({ encoding: "base64" });
+          elementData.screenshot = screenshotBuffer; // base64-encoded screenshot
 
-    res.json(elements);
+          return elementData;
+        } catch (error) {
+          console.error(`Error processing element:`, error);
+          // Continue processing other elements
+          return null;
+        }
+      })
+    );
+
+    // Filter out any null results
+    const elements = elementsData.filter((el) => el !== null);
+
+    res.json({ [elementType]: elements });
   } catch (e) {
     console.error(e);
     res.status(500).send(`Something went wrong: ${e.message}`);

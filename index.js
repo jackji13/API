@@ -6,7 +6,8 @@ const app = express();
 const allowedOrigins = [
   'https://jackji13.github.io',
   'http://127.0.0.1:5500',
-  'http://localhost:3000'
+  'http://localhost:3000',
+  'http://localhost:4000', // Ensure your frontend origin is allowed
 ];
 
 app.use(cors({
@@ -22,11 +23,11 @@ app.use(cors({
 const PORT = process.env.PORT || 4000;
 
 app.get("/scrape", async (req, res) => {
-  const { url } = req.query;
-  if (!url) {
-    return res.status(400).send("URL is required");
+  const { url, elementType } = req.query;
+  if (!url || !elementType) {
+    return res.status(400).send("URL and elementType are required");
   }
-  await scrapeLogic(url, res);
+  await scrapeLogic(url, elementType, res);
 });
 
 app.get("/", (req, res) => {
