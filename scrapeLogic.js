@@ -19,9 +19,9 @@ const scrapeLogic = async (url, res) => {
     const page = await browser.newPage();
     await page.goto(url, { waitUntil: "load", timeout: 0 });
 
-
+    // Scrape multiple types of elements in the context of the browser
     const elements = await page.evaluate(() => {
-
+      // Helper function to scrape elements
       const scrapeElements = (selector) => {
         return Array.from(document.querySelectorAll(selector)).map((element) => {
           const computedStyles = window.getComputedStyle(element);
